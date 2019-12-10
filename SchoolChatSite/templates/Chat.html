@@ -1,0 +1,45 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "bootstrap/base.html" %}
+
+
+   {% block title %}Chat {% endblock  %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type = "text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
+<script type = "text/javascript" src = {{url_for('static' , filename = 'main.js')}}></script>
+{{super()}}
+
+{% endblock %}
+
+
+{% block content %}
+<div class = 'container'>
+        
+    <div class = 'page-header'>
+        <h1><font color = 'navy'>Welcome {{username}}</font></h1>
+    </div>
+
+    <p>
+
+    </p>
+    <p>
+
+    </p>
+    {{wtf.quick_form(form)}}
+</div>
+
+<div class = 'container'>
+        <div class = 'page-header'>
+               <h3><font color = 'Navy'>Chat:</font></h3> 
+            </div>
+    <div class = 'page-header'>
+        <div class = 'message-holder'>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

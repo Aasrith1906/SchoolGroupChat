@@ -1,0 +1,44 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "bootstrap/base.html" %}
+
+{% block title %} Login {% endblock %}
+
+ 
+{% block content %}
+
+
+<p align = "left">
+
+<div class = "container">
+		<div class="page-header">
+				<font color = 'navy'>
+			<h1> Login to enter chat:</h1></font>
+		</div>
+	</div>
+<div class = "container">
+	{{wtf.quick_form(form)}}
+</div>
+<p>
+
+	
+</p>
+<div class = "container">
+
+
+		{% with messages = get_flashed_messages() %}
+		  {% if messages %}
+			{% for message in messages %}
+			<div class = "alert alert-warning">
+			<button type="button" , class="close" , data-dismiss ="alert">&times;</button> 
+			{{ message }}
+		</div> 
+			{% endfor %}  
+		  {% endif %}
+		{% endwith %}
+		
+		</div>
+
+</p>
+{% endblock %}
+
+
