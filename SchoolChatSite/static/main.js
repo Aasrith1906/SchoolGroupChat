@@ -1,43 +1,38 @@
 
-var password = "audhaw;dhapoghefg;hagh[q0ygfw'ptg929]06tu";
 
-function EncryptMessage(string)
-{
-    var encrypted_message = CryptoJS.AES.encrypt(string , password);
+var key = "kiawougd"
 
-    return encrypted_message;
-}
-
-function DecryptMessage(encrypted_message)
-{
-    var decrypred_message = CryptoJS.AES.decrypt(encrypted_message,password)
-
-    decrypred_message = decrypred_message.toString(CryptoJS.enc.Utf8)
-}
 var socket = io.connect('http://' + document.domain + ':' + location.port + '/Chat');
 
-        socket.on('Test',function(message)
+        $('#logout').click(function()
+        {
+            location.href = 'http://' + document.domain + ':' + location.port + '/logout';
+        });
+
+        socket.on('UserConnectionResponse',function(message)
         {
             console.log(message);
-            $('div.message-holder').append('<div><b style="color: #000">'+message.username+'</b> '+message.data+'</div>' )
+            $('div.message-holder').append('<div><b><font color = navy >'+message['username']+'</font></b> '+message['data']+'</div>' )
         })
 
         socket.on('RecieveUserMessage',
         function(message){
-            var message_value_decrypted = DecryptMessage(message['data'])
-            $('div.message-holder').append('<div><b><font color = navy >' +message['username'] +'</font></b> '+ ':' + message_value_decrypted +'</div>' )
+            var message_value_decrypted = CryptoJS.AES.decrypt(message.data,key).toString(CryptoJS.enc.Utf8)
+            $('div.message-holder').append('<div><b><font color = navy >' +message['username'] +'</font></b> '+ ':' + message_value_decrypted.toString() +'</div>' )
 
         })
 
-        $('#submit').click(
+        $('form.form').submit(
             function(e)
             {
                 e.preventDefault()
                 var message = $('#EnterMessage').val();
-                var message_encrypted = EncryptMessage(message)
-                console.log(message_encrypted)
+                var message_encrypted = CryptoJS.AES.encrypt(message , key)
+                console.log(message_encrypted.toString())
                 document.getElementById('EnterMessage').value = null
-                socket.emit('UserMessage' , message_encrypted);
+                socket.emit('UserMessage' , message_encrypted.toString());
                
             }
         )
+
+       

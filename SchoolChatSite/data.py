@@ -7,35 +7,26 @@ class User(UserMixin):
 
     connection = pyodbc.connect(driver='{SQL Server}', server='.', database='ChatServer',               
                 trusted_connection='yes')
+
     cursor = connection.cursor()
 
-    def __init__(self , username):
+    def __init__(self , user_id):
 
-        User.cursor.execute("SELECT * FROM ChatLogin WHERE Username = ?"  , username)
+        User.cursor.execute("SELECT * FROM ChatLogin WHERE UserID = ? ",user_id)
 
         user_data = User.cursor.fetchone()
 
-        if user_data:
+        self.id = user_id
+        self.username = user_data[2]
+        self.password = user_data[3]
 
-            self.user_id = user_data[0]
-            self.first_name = user_data[1]
-            self.username = username
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def set_id(self, user_id):
-        self.user_id = user_id
-            
     def get_id(self):
 
-        return str(self.user_id)
+        return self.id
+        
+    def __repr__(self):
+
+        return "{}/{}/{}".format(self.user_id,self.username,self.password)
 
 
 
@@ -72,6 +63,29 @@ class Login():
             print(str(e))
 
     @staticmethod
+    def GetUserID(username):
+
+        try:
+
+            Login.cursor.execute("SELECT UserID FROM ChatLogin WHERE USERNAME = ?" , username) 
+
+            rows = Login.cursor.fetchone()
+
+            if rows:
+
+                return int(rows[0])
+
+            else:
+
+                return None
+
+        except Exception as e:
+
+            return False
+
+
+
+    @staticmethod
     def GetFirstName(username):
 
         try:
@@ -96,4 +110,4 @@ class Login():
 
 if __name__ == '__main__':
 
-    Login.GetFirstName('Aasrith1906')
+    Login.GetFirstName('TestUser')

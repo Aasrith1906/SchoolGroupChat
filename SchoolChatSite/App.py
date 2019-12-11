@@ -12,8 +12,6 @@ from wtforms.validators import DataRequired
 
 active_user_list = []
 
-login_manager = LoginManager()
-
 
 class LoginForm(FlaskForm):
 
@@ -24,9 +22,9 @@ class LoginForm(FlaskForm):
 
 class ChatForm(FlaskForm):
 
-    EnterMessage = TextAreaField('Enter Message:', validators=[DataRequired()])
+    EnterMessage = TextAreaField('Enter Message:', validators=[DataRequired('Enter message')])
     submit = SubmitField()
-    logout = SubmitField()
+    #logout = SubmitField()
 
 
 app = Flask(__name__)
@@ -36,11 +34,15 @@ app.config['SECRET_KEY'] = 'adiao;wf0724-j1245j;12'
 socketio = SocketIO(app)
 bootstrap = Bootstrap(app)
 
+login_manager = LoginManager()
+
+login_manager.init_app(app)
 
 @login_manager.user_loader
-def LoadUser(self):
-    return data.User.get_id()
-   
+def load_user(user_id):
+
+    return data.User(user_id)
+
 
 @app.route('/' , methods = ["GET" , "POST"])
 def LoginPage():
@@ -72,19 +74,12 @@ def LoginPage():
                 if data.Login.TryLogin(username , password) == True:
 
                     session['username'] = username
-                    session['Login'] = True
+                    session['firstname'] = data.Login.GetFirstName(username)
+                    user_id = data.Login.GetUserID(username)
 
-                    user = data.User(username)
+                    user = data.User(user_id)
 
-                    '''if data.Login.GetFirstName(username) is not False:
-
-                        session['firstname'] = data.Login.GetFirstName(username)
-                    
-                    else:
-
-                        session['firstname'] = "Unknown"'''
-
-                    #login_user(user)
+                    login_user(user)
                     
                     return redirect(url_for('Chat'))
 
@@ -100,8 +95,9 @@ def LoginPage():
 
     return render_template('Login.html',form = form )
 
-#@login_required
+
 @app.route('/Chat',methods = ['GET' , 'POST'])
+@login_required
 def Chat():
     chatform = ChatForm()
 
@@ -109,12 +105,8 @@ def Chat():
         
         return render_template('Chat.html' , username = session['username'], form = chatform)
 
-    else:
-
-        return render_template('Chat.html' , username = 'Unknown' , form = chatform) 
-
-
 @app.route('/logout')
+@login_required
 def logout():
 
     logout_user()
@@ -130,7 +122,7 @@ def connect():
 
         active_user_list.append(session['username'])
 
-        emit('Test' , {'username':'server' , 'data':'{} has entered the chat'.format(session['username'])})
+        emit('UserConnectionResponse' , {'username':'server' , 'data':'{} has entered the chat'.format(session['firstname'])})
 
         
 
@@ -140,6 +132,15 @@ def UserMessage(message):
     print("{}:{}".format(session['username'] , message))
     
     emit('RecieveUserMessage' , {'username':session['username'] , 'data': message})
+
+@socketio.on('disconnect' , namespace='/Chat')
+def disconnected():
+
+    emit('UserDisconnection' , {'username':'server' , 'data':'{} has left the chat'.format(session['username'])})
+
+    active_user_list.remove(session['username'])
+
+    print('{} has disconnected'.format(session['username']))
 
 if __name__ == '__main__':
 
